@@ -22,6 +22,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 /**
@@ -115,6 +116,22 @@ public class UserFacadeREST extends AbstractFacade<User>
     @Path("topusers{range}")
     @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
     public List<User> topPlayers(@PathParam("range") Integer range) {
+        List<User> u = null;
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<User> q = cb.createQuery(User.class);
+        Root<User> c = q.from(User.class);
+        q.select(c);
+        q.orderBy(cb.desc(c.get("elo")));
+        u = (List<User>) em.createQuery(q).
+                setMaxResults(range).
+                getResultList();
+        return u;
+    }
+    
+        @GET
+    @Path("/topusers")
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public List<User> topPlayersURL(@QueryParam("range") Integer range) {
         List<User> u = null;
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<User> q = cb.createQuery(User.class);
