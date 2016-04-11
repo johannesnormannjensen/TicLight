@@ -6,10 +6,14 @@
 package com.thatwasmystomach.ticlight.service;
 
 import com.thatwasmystomach.ticlight.User;
+import java.util.ArrayList;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -18,6 +22,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 
 /**
@@ -25,7 +30,7 @@ import javax.ws.rs.core.MediaType;
  * @author Johannes
  */
 @Stateless
-@Path("com.thatwasmystomach.ticlight.user")
+@Path("user")
 public class UserFacadeREST extends AbstractFacade<User>
 {
 
@@ -105,6 +110,54 @@ public class UserFacadeREST extends AbstractFacade<User>
     public String countREST()
     {
         return String.valueOf(super.count());
+    }
+
+    @GET
+    @Path("topusers{range}")
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public List<User> topPlayers(@PathParam("range") Integer range) {
+        List<User> u = null;
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<User> q = cb.createQuery(User.class);
+        Root<User> c = q.from(User.class);
+        q.select(c);
+        q.orderBy(cb.desc(c.get("elo")));
+        u = (List<User>) em.createQuery(q).
+                setMaxResults(range).
+                getResultList();
+        return u;
+    }
+    
+        @GET
+    @Path("/topusers")
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public List<User> topPlayersURL(@QueryParam("range") Integer range) {
+        List<User> u = null;
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<User> q = cb.createQuery(User.class);
+        Root<User> c = q.from(User.class);
+        q.select(c);
+        q.orderBy(cb.desc(c.get("elo")));
+        u = (List<User>) em.createQuery(q).
+                setMaxResults(range).
+                getResultList();
+        return u;
+    }
+    
+    @GET
+    @Path("bottomusers{range}")
+    @Produces({MediaType.APPLICATION_XML, MediaType.APPLICATION_JSON})
+    public List<User> bottomPlayers(@PathParam("range") Integer range) {
+        List<User> u = null;
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<User> q = cb.createQuery(User.class);
+        Root<User> c = q.from(User.class);
+        q.select(c);
+        q.orderBy(cb.asc(c.get("elo")));
+        u = (List<User>) em.createQuery(q).
+                setMaxResults(range).
+                getResultList();
+        return u;
     }
 
     @Override
